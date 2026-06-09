@@ -59,6 +59,26 @@ apt install -y "$package"
 fi
 done
 
+# Sprawdzenie czy OpenSSH Server jest zainstalowany
+
+if ! dpkg -s openssh-server >/dev/null 2>&1; then
+echo "[INFO] Installing OpenSSH Server" | tee -a "$REPORT_FILE"
+apt install -y openssh-server
+fi
+
+# Włączenie automatycznego startu SSH
+
+systemctl enable ssh
+
+# Uruchomienie usługi SSH
+
+systemctl start ssh
+
+# Zapis statusu SSH do raportu
+
+echo "[OK] SSH status: $(systemctl is-active ssh)" | tee -a "$REPORT_FILE"
+echo "[OK] SSH enabled: $(systemctl is-enabled ssh)" | tee -a "$REPORT_FILE"
+
 # Sprawdzenie dostępności interpretera Python
 
 if command -v python3 >/dev/null 2>&1; then
@@ -66,6 +86,12 @@ echo "[OK] Python3 found: $(python3 --version)" | tee -a "$REPORT_FILE"
 else
 echo "[WARN] Python3 not found" | tee -a "$REPORT_FILE"
 fi
+
+# Informacje o aktualnym użytkowniku
+
+echo "" | tee -a "$REPORT_FILE"
+echo "--- USER ---" | tee -a "$REPORT_FILE"
+id | tee -a "$REPORT_FILE"
 
 # Informacje o pamięci RAM
 

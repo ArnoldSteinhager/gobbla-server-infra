@@ -1,58 +1,72 @@
 # Gobbla Server Infra
 
-## Cel projektu
+Automatyzacja przygotowania i konfiguracji serwera dla projektu Gobbla.
 
-Gobbla Server Infra to zestaw skryptów automatyzujących przygotowanie i konfigurację serwera dla aplikacji Gobbla.
+Projekt składa się z zestawu skryptów uruchamianych krok po kroku. Każdy krok odpowiada za konkretny element infrastruktury i zapisuje informacje do raportu instalacyjnego.
 
-Projekt powstał na podstawie rzeczywistego procesu wdrażania środowiska produkcyjnego i ma umożliwić odtworzenie kompletnej infrastruktury na nowym serwerze Ubuntu przy możliwie minimalnej liczbie ręcznych operacji.
+## Polecenia startowe
 
-Główne założenia:
+Klonowanie repozytorium:
 
-- automatyzacja instalacji infrastruktury,
-- możliwość wielokrotnego uruchamiania skryptów,
-- podział instalacji na małe, niezależne kroki,
-- raportowanie wykonanych operacji,
-- możliwość wznowienia instalacji po błędzie,
-- centralna konfiguracja w pliku `.env`,
-- dokumentacja tworzona równolegle z rozwojem projektu.
+```bash
+git clone https://github.com/ArnoldSteinhager/gobbla-server-infra.git
+cd gobbla-server-infra
+```
+
+Nadanie uprawnień wykonywania:
+
+```bash
+chmod +x install.sh
+chmod +x scripts/*.sh
+```
+
+Uruchomienie instalatora:
+
+```bash
+sudo ./install.sh
+```
 
 ## Struktura projektu
 
 ```text
 gobbla-server-infra/
-
-.env
-.env.example
-
-install.sh
-
-scripts/
-├── 01-system-check.sh
-├── 02-docker.sh
-├── ...
-
-templates/
-
-state/
-└── install-state.json
-
-logs/
-└── install-report.log
-
-README.md
+├── install.sh
+├── .env
+├── logs/
+├── state/
+├── scripts/
+└── README.md
 ```
 
-## Sposób działania
+- install.sh - główny instalator uruchamiający kolejne kroki.
+- .env - konfiguracja środowiska.
+- logs - raporty i logi instalacji.
+- state - pliki stanu wykorzystywane przez instalator.
+- scripts - skrypty realizujące poszczególne etapy instalacji.
 
-Każdy etap instalacji realizowany jest przez osobny skrypt znajdujący się w katalogu `scripts`.
+## Krok 01 - System Check
 
-Główny skrypt `install.sh` odpowiada za:
+Cel:
+Przygotowanie systemu operacyjnego do dalszej instalacji infrastruktury.
 
-- uruchamianie kroków we właściwej kolejności,
-- kontrolę błędów,
-- zapis raportu instalacji,
-- śledzenie stanu wykonanych kroków.
+Wykonywane operacje:
 
-## Aktualny zakres
+1. Weryfikacja uruchomienia skryptu z uprawnieniami administratora.
+2. Aktualizacja listy pakietów systemowych.
+3. Aktualizacja zainstalowanych pakietów.
+4. Instalacja wymaganych narzędzi systemowych:
+   - git
+   - curl
+   - wget
+   - jq
+   - ca-certificates
+   - gnupg
 
-Projekt jest w trakcie budowy. Dokumentacja odzwierciedla wyłącznie funkcjonalności, które zostały rzeczywiście zaimplementowane i przetestowane.
+5. Weryfikacja dostępności interpretera Python.
+6. Zapis informacji o pamięci RAM do raportu.
+7. Zapis informacji o przestrzeni dyskowej do raportu.
+8. Zapis listy usług w stanie FAILED do raportu.
+9. Utworzenie wpisu w raporcie potwierdzającego zakończenie kroku.
+
+Rezultat:
+System przygotowany do instalacji kolejnych komponentów infrastruktury.
