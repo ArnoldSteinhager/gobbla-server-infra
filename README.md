@@ -70,3 +70,28 @@ Wykonywane operacje:
 
 Rezultat:
 System przygotowany do instalacji kolejnych komponentów infrastruktury.
+
+## Krok 02 - Instalacja Docker
+
+Skrypt `02-docker.sh` instaluje najnowszą wersję Docker Engine oraz Docker Compose z oficjalnego repozytorium Docker.
+
+Zakres działania:
+
+- instalacja wymaganych pakietów systemowych,
+- dodanie oficjalnego repozytorium Docker,
+- instalacja Docker Engine,
+- instalacja Docker Compose Plugin,
+- włączenie automatycznego startu usługi Docker,
+- uruchomienie usługi Docker,
+- dodanie użytkownika instalacyjnego do grupy `docker`,
+- zapis informacji diagnostycznych do raportu instalacji.
+
+Po zakończeniu instalacji wymagane jest ponowne zalogowanie użytkownika, aby aktywować członkostwo w grupie `docker`.
+
+Weryfikacja działania:
+
+```bash
+docker --version
+docker compose version
+docker ps
+```
