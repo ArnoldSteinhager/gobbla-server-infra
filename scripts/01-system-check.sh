@@ -87,11 +87,18 @@ else
 echo "[WARN] Python3 not found" | tee -a "$REPORT_FILE"
 fi
 
-# Informacje o aktualnym użytkowniku
+# Informacje o użytkowniku uruchamiającym instalację
 
 echo "" | tee -a "$REPORT_FILE"
 echo "--- USER ---" | tee -a "$REPORT_FILE"
-id | tee -a "$REPORT_FILE"
+
+if [ -n "${SUDO_USER:-}" ]; then
+    echo "[INFO] Installation user: $SUDO_USER" | tee -a "$REPORT_FILE"
+    id "$SUDO_USER" | tee -a "$REPORT_FILE"
+else
+    echo "[INFO] Installation user: root" | tee -a "$REPORT_FILE"
+    id | tee -a "$REPORT_FILE"
+fi
 
 # Informacje o pamięci RAM
 
