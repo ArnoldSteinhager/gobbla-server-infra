@@ -62,7 +62,9 @@ mkdir -p "$INSTALL_DIR/deploy"
 mkdir -p "$INSTALL_DIR/scripts"
 
 # Nadanie właściciela katalogów
-chown -R "$SSH_USER:$SSH_USER" "$INSTALL_DIR"
+chown "$SSH_USER:$SSH_USER" "$INSTALL_DIR"
+chown "$SSH_USER:$SSH_USER" "$INSTALL_DIR/deploy"
+chown "$SSH_USER:$SSH_USER" "$INSTALL_DIR/scripts"
 
 # Wyświetlenie informacji o katalogach
 echo "[OK] Directory exists: $INSTALL_DIR" | tee -a "$REPORT_FILE"

@@ -66,6 +66,7 @@ echo "[INFO] Updating package lists" | tee -a "$REPORT_FILE"
 apt update
 
 # Instalacja Docker Engine oraz Docker Compose Plugin
+echo "[INFO] Installing Docker Engine" | tee -a "$REPORT_FILE"
 apt install -y \
     docker-ce \
     docker-ce-cli \

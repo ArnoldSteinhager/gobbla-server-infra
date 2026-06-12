@@ -33,10 +33,12 @@ fi
 
 # Aktualizacja listy pakietów
 
+echo "[INFO] Updating package lists" | tee -a "$REPORT_FILE"
 apt update
 
 # Aktualizacja zainstalowanych pakietów
 
+echo "[INFO] Upgrading installed packages" | tee -a "$REPORT_FILE"
 apt upgrade -y
 
 # Instalacja podstawowych narzędzi wymaganych przez kolejne kroki
