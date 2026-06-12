@@ -20,6 +20,10 @@ mkdir -p state
 
 REPORT_FILE="logs/install-report.log"
 
+# Ścieżka do pliku stanu
+
+STATE_FILE="state/install-state.json"
+
 # Wyczyszczenie raportu z poprzedniego uruchomienia
 
 : > "$REPORT_FILE"
@@ -80,19 +84,77 @@ fi
 # Lista kroków instalacji
 
 STEPS=(
-"01-system-check.sh"
-"02-docker.sh"
-"03-directories.sh"
+"01-system-check"
+"02-docker"
+"03-directories"
 )
+
+# Utworzenie pliku stanu jeśli nie istnieje
+
+if [ ! -f "$STATE_FILE" ]; then
+
+cat > "$STATE_FILE" <<EOF
+{
+"01-system-check": "pending",
+"02-docker": "pending",
+"03-directories": "pending"
+}
+EOF
+
+fi
+
+# Odczyt stanu kroku
+
+get_step_status() {
+local step_name="$1"
+
+```
+jq -r --arg step "$step_name" '.[$step]' "$STATE_FILE"
+```
+
+}
+
+# Zapis stanu kroku
+
+set_step_status() {
+local step_name="$1"
+local status="$2"
+
+```
+local tmp_file
+tmp_file=$(mktemp)
+
+jq \
+    --arg step "$step_name" \
+    --arg status "$status" \
+    '.[$step] = $status' \
+    "$STATE_FILE" > "$tmp_file"
+
+mv "$tmp_file" "$STATE_FILE"
+```
+
+}
 
 # Uruchamianie kolejnych kroków
 
 for STEP in "${STEPS[@]}"; do
 
 ```
+STATUS=$(get_step_status "$STEP")
+
+if [ "$STATUS" = "done" ]; then
+
+    echo "[INFO] Skipping completed step: $STEP" | tee -a "$REPORT_FILE"
+
+    continue
+
+fi
+
+SCRIPT_FILE="scripts/$STEP.sh"
+
 # Sprawdzenie czy plik istnieje
-if [ ! -f "scripts/$STEP" ]; then
-    echo "[ERROR] Missing script: scripts/$STEP" | tee -a "$REPORT_FILE"
+if [ ! -f "$SCRIPT_FILE" ]; then
+    echo "[ERROR] Missing script: $SCRIPT_FILE" | tee -a "$REPORT_FILE"
     exit 1
 fi
 
@@ -101,7 +163,9 @@ echo "========================================" | tee -a "$REPORT_FILE"
 echo "START: $STEP" | tee -a "$REPORT_FILE"
 echo "========================================" | tee -a "$REPORT_FILE"
 
-bash "scripts/$STEP"
+bash "$SCRIPT_FILE"
+
+set_step_status "$STEP" "done"
 
 echo "========================================" | tee -a "$REPORT_FILE"
 echo "FINISHED: $STEP" | tee -a "$REPORT_FILE"
