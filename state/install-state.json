@@ -4,5 +4,6 @@
   "03-directories": "pending",
   "04-github-ssh": "pending",
   "05-clone-repositories": "pending",
-  "06-deploy-files": "pending"
+  "06-deploy-files": "pending",
+  "07-firewall": "pending"
 }

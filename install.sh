@@ -102,6 +102,7 @@ STEPS=(
     "04-github-ssh"
     "05-clone-repositories"
     "06-deploy-files"
+    "07-firewall"
 )
 
 # Utworzenie pliku stanu jeśli nie istnieje
@@ -116,6 +117,7 @@ cat > "$STATE_FILE" <<EOF
     "04-github-ssh": "pending",
     "05-clone-repositories": "pending"
     "06-deploy-files": "pending"
+    "07-firewall": "pending"
 }
 EOF
 
