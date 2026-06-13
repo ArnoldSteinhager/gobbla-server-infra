@@ -108,9 +108,9 @@ fi
 get_step_status() {
 local step_name="$1"
 
-```
+
 jq -r --arg step "$step_name" '.[$step]' "$STATE_FILE"
-```
+
 
 }
 
@@ -120,7 +120,7 @@ set_step_status() {
 local step_name="$1"
 local status="$2"
 
-```
+
 local tmp_file
 tmp_file=$(mktemp)
 
@@ -131,7 +131,7 @@ jq \
     "$STATE_FILE" > "$tmp_file"
 
 mv "$tmp_file" "$STATE_FILE"
-```
+
 
 }
 
@@ -139,7 +139,7 @@ mv "$tmp_file" "$STATE_FILE"
 
 for STEP in "${STEPS[@]}"; do
 
-```
+
 STATUS=$(get_step_status "$STEP")
 echo "[DEBUG] STEP=$STEP STATUS=$STATUS"
 
@@ -171,7 +171,7 @@ set_step_status "$STEP" "done"
 echo "========================================" | tee -a "$REPORT_FILE"
 echo "FINISHED: $STEP" | tee -a "$REPORT_FILE"
 echo "========================================" | tee -a "$REPORT_FILE"
-```
+
 
 done
 
