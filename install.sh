@@ -16,6 +16,12 @@ mkdir -p logs
 
 mkdir -p state
 
+# Nadanie właściciela katalogów użytkownikowi uruchamiającemu sudo
+
+if [ -n "${SUDO_USER:-}" ]; then
+    chown -R "$SUDO_USER:$SUDO_USER" logs state
+fi
+
 # Ścieżka do raportu instalacji
 
 REPORT_FILE="logs/install-report.log"
@@ -27,6 +33,12 @@ STATE_FILE="state/install-state.json"
 # Wyczyszczenie raportu z poprzedniego uruchomienia
 
 : > "$REPORT_FILE"
+
+# Nadanie właściciela raportu użytkownikowi uruchamiającemu sudo
+
+if [ -n "${SUDO_USER:-}" ]; then
+    chown "$SUDO_USER:$SUDO_USER" "$REPORT_FILE"
+fi
 
 # Nagłówek raportu
 
@@ -103,35 +115,59 @@ cat > "$STATE_FILE" <<EOF
 }
 EOF
 
+
+if [ -n "${SUDO_USER:-}" ]; then
+    chown "$SUDO_USER:$SUDO_USER" "$STATE_FILE"
+fi
+
+
 fi
 
 # Odczyt stanu kroku
 
 get_step_status() {
-    local step_name="$1"
-    jq -r --arg step "$step_name" '.[$step]' "$STATE_FILE"
+local step_name="$1"
+
+
+jq -r --arg step "$step_name" '
+    if has($step)
+    then .[$step]
+    else "pending"
+    end
+' "$STATE_FILE"
+
+
 }
 
 # Zapis stanu kroku
 
 set_step_status() {
-    local step_name="$1"
-    local status="$2"
-    local tmp_file
-    tmp_file=$(mktemp)
+local step_name="$1"
+local status="$2"
 
-    jq \
-        --arg step "$step_name" \
-        --arg status "$status" \
-        '.[$step] = $status' \
-        "$STATE_FILE" > "$tmp_file"
 
-    mv "$tmp_file" "$STATE_FILE"
+local tmp_file
+tmp_file=$(mktemp)
+
+jq \
+    --arg step "$step_name" \
+    --arg status "$status" \
+    '.[$step] = $status' \
+    "$STATE_FILE" > "$tmp_file"
+
+mv "$tmp_file" "$STATE_FILE"
+
+if [ -n "${SUDO_USER:-}" ]; then
+    chown "$SUDO_USER:$SUDO_USER" "$STATE_FILE"
+fi
+
+
 }
 
 # Uruchamianie kolejnych kroków
 
 for STEP in "${STEPS[@]}"; do
+
 
 STATUS=$(get_step_status "$STEP")
 
@@ -181,7 +217,6 @@ elif [ "$SCRIPT_EXIT_CODE" -eq 10 ]; then
     exit 0
 
 else
-
     echo "[ERROR] Step failed: $STEP" | tee -a "$REPORT_FILE"
     exit "$SCRIPT_EXIT_CODE"
 
@@ -190,7 +225,6 @@ fi
 echo "========================================" | tee -a "$REPORT_FILE"
 echo "FINISHED: $STEP" | tee -a "$REPORT_FILE"
 echo "========================================" | tee -a "$REPORT_FILE"
-
 
 done
 
