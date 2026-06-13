@@ -40,7 +40,9 @@ fi
 
 # shellcheck disable=SC1091
 
+set -a
 source .env
+set +a
 
 # Walidacja zmiennych
 
@@ -81,13 +83,13 @@ mkdir -p "$DEPLOY_DIR/nginx"
 
 # Generowanie compose.yml
 
-envsubst \
+envsubst '${MONGO_VERSION} ${SERVER_LAN_IP} ${ENVIRONMENT}' \
     < templates/compose.yml.template \
     > "$DEPLOY_DIR/compose.yml"
 
 # Generowanie nginx config
 
-envsubst \
+envsubst '${DOMAIN}' \
     < templates/nginx/default.conf.template \
     > "$DEPLOY_DIR/nginx/default.conf"
 
