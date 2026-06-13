@@ -69,7 +69,7 @@ fi
 # Add GitHub to known_hosts
 if ! grep -q "github.com" "$SSH_DIR/known_hosts" 2>/dev/null; then
     echo "[INFO] Adding github.com to known_hosts." | tee -a "$REPORT_FILE"
-    sudo -u "$SSH_USER" ssh-keyscan github.com >> "$SSH_DIR/known_hosts"
+    sudo -u "$SSH_USER" ssh-keyscan github.com >> "$SSH_DIR/known_hosts" 2>/dev/null
 
 fi
 

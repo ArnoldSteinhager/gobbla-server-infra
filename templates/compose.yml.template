@@ -1,0 +1,40 @@
+services:
+  mongo:
+    image: mongo:${MONGO_VERSION}
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      GLIBC_TUNABLES: glibc.cpu.hwcaps=-SHSTK
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "${SERVER_LAN_IP}:27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    image: gobbla-api:latest
+    container_name: gobbla-api
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: ${ENVIRONMENT}
+
+  ui:
+    image: gobbla-ui:latest
+    container_name: gobbla-ui
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+volumes:
+  mongo_data:

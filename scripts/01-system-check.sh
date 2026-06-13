@@ -50,6 +50,7 @@ wget
 jq
 ca-certificates
 gnupg
+gettext-base
 )
 
 for package in "${PACKAGES[@]}"; do
