@@ -38,15 +38,15 @@ echo "========================================" | tee -a "$REPORT_FILE"
 # Sprawdzenie czy instalator został uruchomiony jako root
 
 if [ "$EUID" -ne 0 ]; then
-echo "[ERROR] Uruchom instalator jako root." | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] Uruchom instalator jako root." | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 # Sprawdzenie czy istnieje plik .env
 
 if [ ! -f ".env" ]; then
-echo "[ERROR] File .env not found" | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] File .env not found" | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 # Wczytanie konfiguracji środowiska
@@ -60,13 +60,13 @@ source .env
 # Sprawdzenie wymaganych zmiennych
 
 if [ -z "${INSTALL_DIR:-}" ]; then
-echo "[ERROR] INSTALL_DIR is not defined in .env" | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] INSTALL_DIR is not defined in .env" | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 if [ -z "${SSH_USER:-}" ]; then
-echo "[ERROR] SSH_USER is not defined in .env" | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] SSH_USER is not defined in .env" | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 # Zapis konfiguracji do raportu
@@ -77,16 +77,17 @@ echo "[INFO] SSH user: $SSH_USER" | tee -a "$REPORT_FILE"
 # Sprawdzenie katalogu scripts
 
 if [ ! -d "scripts" ]; then
-echo "[ERROR] Directory scripts not found" | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] Directory scripts not found" | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 # Lista kroków instalacji
 
 STEPS=(
-"01-system-check"
-"02-docker"
-"03-directories"
+    "01-system-check"
+    "02-docker"
+    "03-directories"
+    "04-github-ssh"
 )
 
 # Utworzenie pliku stanu jeśli nie istnieje
@@ -95,9 +96,10 @@ if [ ! -f "$STATE_FILE" ]; then
 
 cat > "$STATE_FILE" <<EOF
 {
-"01-system-check": "pending",
-"02-docker": "pending",
-"03-directories": "pending"
+    "01-system-check": "pending",
+    "02-docker": "pending",
+    "03-directories": "pending",
+    "04-github-ssh": "pending"
 }
 EOF
 
@@ -106,48 +108,40 @@ fi
 # Odczyt stanu kroku
 
 get_step_status() {
-local step_name="$1"
-
-
-jq -r --arg step "$step_name" '.[$step]' "$STATE_FILE"
-
-
+    local step_name="$1"
+    jq -r --arg step "$step_name" '.[$step]' "$STATE_FILE"
 }
 
 # Zapis stanu kroku
 
 set_step_status() {
-local step_name="$1"
-local status="$2"
+    local step_name="$1"
+    local status="$2"
+    local tmp_file
+    tmp_file=$(mktemp)
 
+    jq \
+        --arg step "$step_name" \
+        --arg status "$status" \
+        '.[$step] = $status' \
+        "$STATE_FILE" > "$tmp_file"
 
-local tmp_file
-tmp_file=$(mktemp)
-
-jq \
-    --arg step "$step_name" \
-    --arg status "$status" \
-    '.[$step] = $status' \
-    "$STATE_FILE" > "$tmp_file"
-
-mv "$tmp_file" "$STATE_FILE"
-
-
+    mv "$tmp_file" "$STATE_FILE"
 }
 
 # Uruchamianie kolejnych kroków
 
 for STEP in "${STEPS[@]}"; do
 
-
 STATUS=$(get_step_status "$STEP")
 
 if [ "$STATUS" = "done" ]; then
-
     echo "[INFO] Skipping completed step: $STEP" | tee -a "$REPORT_FILE"
-
     continue
+fi
 
+if [ "$STATUS" = "action-required" ]; then
+    echo "[INFO] Step requires user action: $STEP" | tee -a "$REPORT_FILE"
 fi
 
 SCRIPT_FILE="scripts/$STEP.sh"

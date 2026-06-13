@@ -1,5 +1,6 @@
 {
   "01-system-check": "pending",
   "02-docker": "pending",
-  "03-directories": "pending"
+  "03-directories": "pending",
+  "04-github-ssh": "pending"
 }
