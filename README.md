@@ -33,6 +33,7 @@ SSH_USER=arnolds
 ```bash
 chmod +x install.sh
 chmod +x scripts/*.sh
+chmod +x state/*.json
 ```
 
 ### Uruchomienie instalatora

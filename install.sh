@@ -141,6 +141,7 @@ for STEP in "${STEPS[@]}"; do
 
 ```
 STATUS=$(get_step_status "$STEP")
+echo "[DEBUG] STEP=$STEP STATUS=$STATUS"
 
 if [ "$STATUS" = "done" ]; then
 
