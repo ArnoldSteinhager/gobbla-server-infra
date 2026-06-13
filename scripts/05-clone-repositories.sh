@@ -56,12 +56,10 @@ REQUIRED_VARS=(
 
 for VAR in "${REQUIRED_VARS[@]}"; do
 
-
-if [ -z "${!VAR:-}" ]; then
-    echo "[ERROR] Missing variable in .env: $VAR" | tee -a "$REPORT_FILE"
-    exit 1
-fi
-
+    if [ -z "${!VAR:-}" ]; then
+        echo "[ERROR] Missing variable in .env: $VAR" | tee -a "$REPORT_FILE"
+        exit 1
+    fi
 
 done
 
@@ -76,10 +74,10 @@ fi
 
 set +e
 
-sudo -u "$SSH_USER" ssh 
--o BatchMode=yes 
--o StrictHostKeyChecking=yes 
--T git@github.com >/tmp/github-test.log 2>&1
+sudo -u "$SSH_USER" ssh \
+    -o BatchMode=yes \
+    -o StrictHostKeyChecking=yes \
+    -T git@github.com >/tmp/github-test.log 2>&1
 
 SSH_RESULT=$?
 
@@ -97,6 +95,7 @@ echo "[OK] GitHub SSH authentication verified." | tee -a "$REPORT_FILE"
 
 if [ ! -d "$API_DIR/.git" ]; then
     echo "[INFO] Cloning API repository." | tee -a "$REPORT_FILE"
+
     sudo -u "$SSH_USER" git clone \
         "$API_REPO" \
         "$API_DIR"
@@ -109,24 +108,26 @@ fi
 
 if [ ! -d "$UI_DIR/.git" ]; then
     echo "[INFO] Cloning UI repository." | tee -a "$REPORT_FILE"
+
     sudo -u "$SSH_USER" git clone \
         "$UI_REPO" \
         "$UI_DIR"
+
 else
     echo "[INFO] UI repository already exists." | tee -a "$REPORT_FILE"
 fi
 
 # Checkout API branch
 
-sudo -u "$SSH_USER" git 
--C "$API_DIR" 
-checkout "$API_BRANCH"
+sudo -u "$SSH_USER" git \
+    -C "$API_DIR" \
+    checkout "$API_BRANCH"
 
 # Checkout UI branch
 
-sudo -u "$SSH_USER" git 
--C "$UI_DIR" 
-checkout "$UI_BRANCH"
+sudo -u "$SSH_USER" git \
+    -C "$UI_DIR" \
+    checkout "$UI_BRANCH"
 
 # Właściciel katalogów
 
@@ -138,16 +139,16 @@ chown -R "$SSH_USER:$SSH_USER" "$UI_DIR"
 echo "" | tee -a "$REPORT_FILE"
 echo "--- API COMMIT ---" | tee -a "$REPORT_FILE"
 
-sudo -u "$SSH_USER" git 
--C "$API_DIR" 
-rev-parse HEAD | tee -a "$REPORT_FILE"
+sudo -u "$SSH_USER" git \
+    -C "$API_DIR" \
+    rev-parse HEAD | tee -a "$REPORT_FILE"
 
 echo "" | tee -a "$REPORT_FILE"
 echo "--- UI COMMIT ---" | tee -a "$REPORT_FILE"
 
-sudo -u "$SSH_USER" git 
--C "$UI_DIR" 
-rev-parse HEAD | tee -a "$REPORT_FILE"
+sudo -u "$SSH_USER" git \
+    -C "$UI_DIR" \
+    rev-parse HEAD | tee -a "$REPORT_FILE"
 
 # Zakończenie kroku
 
