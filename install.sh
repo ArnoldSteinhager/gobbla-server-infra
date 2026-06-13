@@ -100,6 +100,7 @@ STEPS=(
     "02-docker"
     "03-directories"
     "04-github-ssh"
+    "05-clone-repositories"
 )
 
 # Utworzenie pliku stanu jeśli nie istnieje
@@ -112,6 +113,7 @@ cat > "$STATE_FILE" <<EOF
     "02-docker": "pending",
     "03-directories": "pending",
     "04-github-ssh": "pending"
+    "05-clone-repositories": "pending"
 }
 EOF
 
