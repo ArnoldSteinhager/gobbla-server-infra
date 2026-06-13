@@ -27,15 +27,15 @@ echo "========================================" | tee -a "$REPORT_FILE"
 # Sprawdzenie czy skrypt został uruchomiony jako root
 
 if [ "$EUID" -ne 0 ]; then
-echo "[ERROR] Run script as root." | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] Run script as root." | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 # Sprawdzenie czy istnieje plik .env
 
 if [ ! -f ".env" ]; then
-echo "[ERROR] File .env not found." | tee -a "$REPORT_FILE"
-exit 1
+    echo "[ERROR] File .env not found." | tee -a "$REPORT_FILE"
+    exit 1
 fi
 
 # shellcheck disable=SC1091
@@ -61,6 +61,8 @@ if [ -z "${!VAR:-}" ]; then
     echo "[ERROR] Missing variable in .env: $VAR" | tee -a "$REPORT_FILE"
     exit 1
 fi
+
+
 done
 
 # Weryfikacja użytkownika
@@ -98,9 +100,9 @@ if [ ! -d "$API_DIR/.git" ]; then
     sudo -u "$SSH_USER" git clone \
         "$API_REPO" \
         "$API_DIR"
-else
 
-echo "[INFO] API repository already exists." | tee -a "$REPORT_FILE"
+else
+    echo "[INFO] API repository already exists." | tee -a "$REPORT_FILE"
 fi
 
 # Klonowanie UI
@@ -110,7 +112,6 @@ if [ ! -d "$UI_DIR/.git" ]; then
     sudo -u "$SSH_USER" git clone \
         "$UI_REPO" \
         "$UI_DIR"
-
 else
     echo "[INFO] UI repository already exists." | tee -a "$REPORT_FILE"
 fi

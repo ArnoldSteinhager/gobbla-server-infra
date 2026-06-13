@@ -112,7 +112,7 @@ cat > "$STATE_FILE" <<EOF
     "01-system-check": "pending",
     "02-docker": "pending",
     "03-directories": "pending",
-    "04-github-ssh": "pending"
+    "04-github-ssh": "pending",
     "05-clone-repositories": "pending"
 }
 EOF
