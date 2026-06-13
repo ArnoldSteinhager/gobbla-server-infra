@@ -157,9 +157,35 @@ echo "========================================" | tee -a "$REPORT_FILE"
 echo "START: $STEP" | tee -a "$REPORT_FILE"
 echo "========================================" | tee -a "$REPORT_FILE"
 
-bash "$SCRIPT_FILE"
+set +e
 
-set_step_status "$STEP" "done"
+bash "$SCRIPT_FILE"
+SCRIPT_EXIT_CODE=$?
+
+set -e
+
+if [ "$SCRIPT_EXIT_CODE" -eq 0 ]; then
+
+    set_step_status "$STEP" "done"
+
+elif [ "$SCRIPT_EXIT_CODE" -eq 10 ]; then
+
+    set_step_status "$STEP" "action-required"
+
+    echo "" | tee -a "$REPORT_FILE"
+    echo "========================================" | tee -a "$REPORT_FILE"
+    echo "[ACTION REQUIRED] Installation paused." | tee -a "$REPORT_FILE"
+    echo "Resolve the requested action and run install.sh again." | tee -a "$REPORT_FILE"
+    echo "========================================" | tee -a "$REPORT_FILE"
+
+    exit 0
+
+else
+
+    echo "[ERROR] Step failed: $STEP" | tee -a "$REPORT_FILE"
+    exit "$SCRIPT_EXIT_CODE"
+
+fi
 
 echo "========================================" | tee -a "$REPORT_FILE"
 echo "FINISHED: $STEP" | tee -a "$REPORT_FILE"
