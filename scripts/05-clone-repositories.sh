@@ -79,7 +79,7 @@ set +e
 sudo -u "$SSH_USER" ssh 
 -o BatchMode=yes 
 -o StrictHostKeyChecking=yes 
--T [git@github.com](mailto:git@github.com) >/tmp/github-test.log 2>&1
+-T git@github.com >/tmp/github-test.log 2>&1
 
 SSH_RESULT=$?
 
